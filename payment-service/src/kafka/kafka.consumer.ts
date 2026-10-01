@@ -1,3 +1,4 @@
+import { ProtobufService } from './../../../src/kafka/protobuf.service';
 import {
   Injectable,
   Logger,
@@ -16,7 +17,10 @@ export class KafkaConsumer implements OnModuleInit, OnModuleDestroy {
     groupId: 'payment-group',
   });
 
-  constructor(private readonly paymentService: PaymentService) {}
+  constructor(
+    private readonly paymentService: PaymentService,
+    private readonly protobufService: ProtobufService,
+  ) {}
 
   async onModuleInit() {
     await this.consumer.connect();
@@ -26,8 +30,9 @@ export class KafkaConsumer implements OnModuleInit, OnModuleDestroy {
     });
 
     await this.consumer.run({
-      eachMessage: async ({ topic, partition, message }) => {
-        const order = JSON.parse(message.value!.toString());
+      autoCommit: false,
+      eachMessage: async ({ topic, partition, message, heartbeat }) => {
+        const order = this.protobufService.decode(message.value!);
 
         this.logger.log(
           `
@@ -39,6 +44,16 @@ export class KafkaConsumer implements OnModuleInit, OnModuleDestroy {
         );
 
         this.paymentService.processPayment(order);
+
+        await this.consumer.commitOffsets([
+          {
+            topic,
+            partition,
+            offset: String(Number(message.offset) + 1),
+          },
+        ]);
+
+        await heartbeat();
       },
     });
   }

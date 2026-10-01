@@ -1,0 +1,10 @@
+syntax = "proto3";
+
+package ecommerce;
+
+message OrderCreatedEvent {
+  string id = 1;
+  string paymentId = 2;
+  string product = 3;
+  double price = 4;
+}

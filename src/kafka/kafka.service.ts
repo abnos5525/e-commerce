@@ -1,3 +1,4 @@
+import { ProtobufService } from './protobuf.service';
 import {
   Injectable,
   Logger,
@@ -19,9 +20,12 @@ export class KafkaService implements OnModuleInit, OnModuleDestroy {
     createPartitioner: Partitioners.DefaultPartitioner,
   });
 
+  constructor(private readonly protobufService: ProtobufService) {}
+
   async onModuleInit() {
     await this.ensureTopics();
     await this.producer.connect();
+    await this.protobufService.load();
   }
 
   async onModuleDestroy() {
@@ -34,7 +38,7 @@ export class KafkaService implements OnModuleInit, OnModuleDestroy {
       messages: [
         {
           key: String(order.id),
-          value: JSON.stringify(order),
+          value: this.protobufService.encode(order),
         },
       ],
     });

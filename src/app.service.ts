@@ -8,7 +8,12 @@ export class AppService {
   constructor(private readonly kafkaService: KafkaService) {}
 
   async sendOrderCreated(dto: CreateOrderDto) {
-    const order = { id: randomUUID(), ...dto };
+    const order = {
+      id: randomUUID(),
+      paymentId: randomUUID(),
+      ...dto,
+    };
+
     await this.kafkaService.sendOrderCreated(order);
     return order;
   }
