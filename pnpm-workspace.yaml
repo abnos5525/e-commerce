@@ -1,0 +1,17 @@
+packages:
+  - '.'
+
+overrides:
+  'glob@10': '13.0.6'
+
+onlyBuiltDependencies:
+  - '@nestjs/core'
+  - '@parcel/watcher'
+  - unrs-resolver
+
+allowBuilds:
+  '@parcel/watcher': true
+  unrs-resolver: true
+
+minimumReleaseAgeExclude:
+  - globals@17.13.0
