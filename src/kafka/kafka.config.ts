@@ -10,5 +10,5 @@ export const KAFKA_TOPICS = {
 } as const;
 
 export const KAFKA_TOPIC_CONFIGS: ITopicConfig[] = [
-  { topic: KAFKA_TOPICS.ORDERS, numPartitions: 1, replicationFactor: 1 },
+  { topic: KAFKA_TOPICS.ORDERS, numPartitions: 3, replicationFactor: 1 },
 ];

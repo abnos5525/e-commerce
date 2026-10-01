@@ -1,16 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
+import { CreateOrderDto } from './dto/create-order.dto';
 import { KafkaService } from './kafka/kafka.service';
 
 @Injectable()
 export class AppService {
   constructor(private readonly kafkaService: KafkaService) {}
 
-  async sendOrderCreated() {
-    await this.kafkaService.sendOrderCreated({
-      id: randomUUID(),
-      product: 'Laptop',
-      price: 2000,
-    });
+  async sendOrderCreated(dto: CreateOrderDto) {
+    const order = { id: randomUUID(), ...dto };
+    await this.kafkaService.sendOrderCreated(order);
+    return order;
   }
 }

@@ -28,6 +28,18 @@ export class KafkaService implements OnModuleInit, OnModuleDestroy {
     await this.producer.disconnect();
   }
 
+  async sendOrderCreated(order: any) {
+    await this.producer.send({
+      topic: KAFKA_TOPICS.ORDERS,
+      messages: [
+        {
+          key: String(order.id),
+          value: JSON.stringify(order),
+        },
+      ],
+    });
+  }
+
   private async ensureTopics() {
     const admin = this.kafka.admin();
     await admin.connect();
@@ -47,17 +59,5 @@ export class KafkaService implements OnModuleInit, OnModuleDestroy {
     } finally {
       await admin.disconnect();
     }
-  }
-
-  async sendOrderCreated(order: any) {
-    await this.producer.send({
-      topic: KAFKA_TOPICS.ORDERS,
-      messages: [
-        {
-          key: String(order.id),
-          value: JSON.stringify(order),
-        },
-      ],
-    });
   }
 }

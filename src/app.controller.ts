@@ -1,12 +1,16 @@
-import { Controller, Get } from '@nestjs/common';
+import { Body, Controller, Post } from '@nestjs/common';
+import { ApiCreatedResponse, ApiTags } from '@nestjs/swagger';
 import { AppService } from './app.service';
+import { CreateOrderDto } from './dto/create-order.dto';
 
-@Controller()
+@ApiTags('orders')
+@Controller('orders')
 export class AppController {
   constructor(private readonly appService: AppService) {}
 
-  @Get()
-  async sendOrder() {
-    await this.appService.sendOrderCreated();
+  @Post()
+  @ApiCreatedResponse({ description: 'Order created and sent to Kafka' })
+  sendOrder(@Body() dto: CreateOrderDto) {
+    return this.appService.sendOrderCreated(dto);
   }
 }

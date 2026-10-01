@@ -11,6 +11,7 @@ onlyBuiltDependencies:
 
 allowBuilds:
   '@parcel/watcher': true
+  '@scarf/scarf': false
   unrs-resolver: true
 
 minimumReleaseAgeExclude:
