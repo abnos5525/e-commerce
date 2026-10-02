@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { join } from 'node:path';
 import protobuf from 'protobufjs';
 
 @Injectable()
@@ -6,9 +7,12 @@ export class ProtobufService {
   private messageType: any;
 
   async load() {
-    const root = await protobuf.load(
-      '../../event-contracts/order-created.proto',
+    const protoPath = join(
+      process.cwd(),
+      'event-contracts',
+      'order-created.proto',
     );
+    const root = await protobuf.load(protoPath);
 
     this.messageType = root.lookupType('ecommerce.OrderCreatedEvent');
   }

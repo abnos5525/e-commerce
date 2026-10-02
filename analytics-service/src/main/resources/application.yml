@@ -1,0 +1,15 @@
+server:
+  port: 3002
+
+spring:
+  application:
+    name: analytics-service
+
+  kafka:
+    bootstrap-servers: localhost:9092
+
+    streams:
+      application-id: analytics-service-group
+      properties:
+        default.key.serde: org.apache.kafka.common.serialization.Serdes$StringSerde
+        default.value.serde: org.apache.kafka.common.serialization.Serdes$StringSerde
