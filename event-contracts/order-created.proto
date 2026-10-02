@@ -2,6 +2,9 @@ syntax = "proto3";
 
 package ecommerce;
 
+option java_package = "com.example.analytics_service.proto";
+option java_multiple_files = true;
+
 message OrderCreatedEvent {
   string id = 1;
   string paymentId = 2;

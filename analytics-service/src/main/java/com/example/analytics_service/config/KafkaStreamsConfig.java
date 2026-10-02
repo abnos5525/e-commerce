@@ -36,7 +36,7 @@ public class KafkaStreamsConfig {
 
         props.put(
             org.apache.kafka.streams.StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG,
-            Serdes.String().getClass()
+            Serdes.ByteArray().getClass()
         );
 
         return new KafkaStreamsConfiguration(props);
