@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
-import { CreateOrderDto } from './dto/create-order.dto';
-import { KafkaService } from './kafka/kafka.service';
+import { CreateOrderDto } from '../dto/create-order.dto';
+import { KafkaService } from '../kafka/kafka.service';
 
 @Injectable()
 export class AppService {

@@ -39,6 +39,14 @@ public class KafkaStreamsConfig {
             Serdes.ByteArray().getClass()
         );
 
+        props.put(org.apache.kafka.streams.StreamsConfig.STATESTORE_CACHE_MAX_BYTES_CONFIG, 0);
+
+        props.put(
+            org.apache.kafka.streams.StreamsConfig.producerPrefix(
+                org.apache.kafka.clients.producer.ProducerConfig.LINGER_MS_CONFIG),
+            0
+        );
+
         return new KafkaStreamsConfiguration(props);
     }
 }

@@ -1,4 +1,3 @@
-import { ProtobufService } from './../../../src/kafka/protobuf.service';
 import {
   Injectable,
   Logger,
@@ -6,6 +5,8 @@ import {
   OnModuleInit,
 } from '@nestjs/common';
 import { Kafka, Consumer } from 'kafkajs';
+import { join } from 'node:path';
+import protobuf from 'protobufjs';
 import { KAFKA_CONFIG, KAFKA_TOPICS } from './kafka.config';
 import { PaymentService } from '../payment/payment.service';
 
@@ -17,12 +18,16 @@ export class KafkaConsumer implements OnModuleInit, OnModuleDestroy {
     groupId: 'payment-group',
   });
 
-  constructor(
-    private readonly paymentService: PaymentService,
-    private readonly protobufService: ProtobufService,
-  ) {}
+  private orderType: protobuf.Type;
+
+  constructor(private readonly paymentService: PaymentService) {}
 
   async onModuleInit() {
+    const root = await protobuf.load(
+      join(process.cwd(), '..', 'event-contracts', 'order-created.proto'),
+    );
+    this.orderType = root.lookupType('ecommerce.OrderCreatedEvent');
+
     await this.consumer.connect();
     await this.consumer.subscribe({
       topic: KAFKA_TOPICS.ORDERS,
@@ -32,7 +37,7 @@ export class KafkaConsumer implements OnModuleInit, OnModuleDestroy {
     await this.consumer.run({
       autoCommit: false,
       eachMessage: async ({ topic, partition, message, heartbeat }) => {
-        const order = this.protobufService.decode(message.value!);
+        const order = this.orderType.decode(message.value!);
 
         this.logger.log(
           `
