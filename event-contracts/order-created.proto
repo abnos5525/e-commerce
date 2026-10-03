@@ -10,4 +10,5 @@ message OrderCreatedEvent {
   string paymentId = 2;
   string product = 3;
   double price = 4;
+  int64 createdAt = 5;
 }
