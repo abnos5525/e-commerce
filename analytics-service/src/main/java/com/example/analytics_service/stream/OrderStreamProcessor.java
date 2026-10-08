@@ -41,8 +41,10 @@ public class OrderStreamProcessor {
                     new org.springframework.kafka.support.serializer.JsonSerializer<>(),
                     new org.springframework.kafka.support.serializer.JsonDeserializer<>(OrderEvent.class))))
         .windowedBy(
-            TimeWindows.ofSizeWithNoGrace(
-                Duration.ofMinutes(5)))
+            TimeWindows.ofSizeAndGrace(
+                Duration.ofMinutes(5)),
+                Duration.ofMinutes(1)
+            )
         .aggregate(
             () -> 0.0,
             (product, order, total) -> total + order.getPrice(),
