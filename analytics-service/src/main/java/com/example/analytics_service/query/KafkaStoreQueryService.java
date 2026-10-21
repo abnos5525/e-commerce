@@ -1,33 +1,79 @@
 package com.example.analytics_service.query;
 
+import java.time.Instant;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 import org.apache.kafka.streams.KafkaStreams;
+import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.StoreQueryParameters;
-import org.apache.kafka.streams.state.ReadOnlyKeyValueStore;
-import org.springframework.stereotype.Service;
+import org.apache.kafka.streams.state.QueryableStoreTypes;
+import org.apache.kafka.streams.state.ReadOnlyWindowStore;
+import org.apache.kafka.streams.state.ValueAndTimestamp;
+import org.apache.kafka.streams.state.WindowStoreIterator;
+
 import org.springframework.kafka.config.StreamsBuilderFactoryBean;
+import org.springframework.stereotype.Service;
 
 @Service
 public class KafkaStoreQueryService {
 
-    private final KafkaStreams kafkaStreams;
+    private final StreamsBuilderFactoryBean factoryBean;
 
     public KafkaStoreQueryService(
             StreamsBuilderFactoryBean factoryBean
     ) {
-        this.kafkaStreams =
-                factoryBean.getKafkaStreams();
+        this.factoryBean = factoryBean;
     }
 
-    public Double getProductSales(
-            String product
+    public Map<Long, Double> getProductSales(
+            String product,
+            long from,
+            long to
     ) {
-        ReadOnlyKeyValueStore<String, Double> store =
+        if (from > to) {
+            throw new IllegalArgumentException(
+                    "'from' must be less than or equal to 'to'"
+            );
+        }
+
+        KafkaStreams kafkaStreams = factoryBean.getKafkaStreams();
+
+        if (kafkaStreams == null) {
+            throw new IllegalStateException(
+                    "Kafka Streams has not been initialized"
+            );
+        }
+
+        ReadOnlyWindowStore<String, ValueAndTimestamp<Double>> store =
                 kafkaStreams.store(
                         StoreQueryParameters.fromNameAndType(
-                                "product-sales-store",
-                                org.apache.kafka.streams.state.QueryableStoreTypes.keyValueStore()
+                                "product-sales-window-store",
+                                QueryableStoreTypes.timestampedWindowStore()
                         )
                 );
-        return store.get(product);
+
+        Map<Long, Double> salesByWindowStart = new LinkedHashMap<>();
+
+        try (
+                WindowStoreIterator<ValueAndTimestamp<Double>> windows =
+                        store.fetch(
+                                product,
+                                Instant.ofEpochMilli(from),
+                                Instant.ofEpochMilli(to)
+                        )
+        ) {
+            while (windows.hasNext()) {
+                KeyValue<Long, ValueAndTimestamp<Double>> entry =
+                        windows.next();
+
+                salesByWindowStart.put(
+                        entry.key,
+                        entry.value.value()
+                );
+            }
+        }
+
+        return salesByWindowStart;
     }
 }
