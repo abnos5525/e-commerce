@@ -96,6 +96,9 @@
                     <protoSourceRoot>
                         ${project.basedir}/../event-contracts
                     </protoSourceRoot>
+
+                    <outputDirectory>${project.basedir}/src/main/java</outputDirectory>
+                    <clearOutputDirectory>false</clearOutputDirectory>
                 </configuration>
 
                 <executions>
