@@ -12,6 +12,7 @@ export class AppService {
       id: randomUUID(),
       paymentId: randomUUID(),
       ...dto,
+      createdAt: Date.now(),
     };
 
     await this.kafkaService.sendOrderCreated(order);
