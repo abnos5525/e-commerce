@@ -2,6 +2,7 @@ package com.example.analytics_service.stream;
 
 import com.example.analytics_service.model.OrderEvent;
 import com.example.analytics_service.proto.OrderCreatedEvent;
+import com.example.analytics_service.timestamp.OrderTimestampExtractor;
 import com.google.protobuf.InvalidProtocolBufferException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.common.serialization.Serdes;
@@ -29,7 +30,10 @@ public class OrderStreamProcessor {
         "orders",
         Consumed.with(
             Serdes.String(),
-            Serdes.ByteArray()));
+            Serdes.ByteArray()
+          ).withTimestampExtractor(
+            new OrderTimestampExtractor()
+        ));
 
     orders
         .mapValues(this::convertToOrder)
