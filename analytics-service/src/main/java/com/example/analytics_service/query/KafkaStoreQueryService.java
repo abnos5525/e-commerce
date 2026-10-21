@@ -11,6 +11,7 @@ import org.apache.kafka.streams.state.QueryableStoreTypes;
 import org.apache.kafka.streams.state.ReadOnlyWindowStore;
 import org.apache.kafka.streams.state.ValueAndTimestamp;
 import org.apache.kafka.streams.state.WindowStoreIterator;
+import org.apache.kafka.streams.errors.InvalidStateStoreException;
 
 import org.springframework.kafka.config.StreamsBuilderFactoryBean;
 import org.springframework.stereotype.Service;
@@ -45,6 +46,15 @@ public class KafkaStoreQueryService {
             );
         }
 
+        KafkaStreams.State currentState = kafkaStreams.state();
+
+        if (currentState != KafkaStreams.State.RUNNING) {
+            throw new IllegalStateException(
+                    "Kafka Streams is not ready. Current state: "
+                            + currentState
+            );
+        }
+        try{
         ReadOnlyWindowStore<String, ValueAndTimestamp<Double>> store =
                 kafkaStreams.store(
                         StoreQueryParameters.fromNameAndType(
@@ -75,5 +85,11 @@ public class KafkaStoreQueryService {
         }
 
         return salesByWindowStart;
+      } catch (InvalidStateStoreException e) {
+        throw new IllegalStateException(
+                "Product sales store is not queryable yet. Retry shortly.",
+                e
+        );
+      }
     }
 }
